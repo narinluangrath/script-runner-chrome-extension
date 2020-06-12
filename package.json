@@ -1,0 +1,25 @@
+{
+  "name": "script-runner-chrome-extension",
+  "version": "0.0.1",
+  "description": "Run custom javascript on websites",
+  "main": "background.js",
+  "author": "Narin Luangrath <narin.luangrath@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "eslint": "^7.2.0",
+    "husky": "^4.2.5",
+    "prettier": "^2.0.5",
+    "pretty-quick": "^2.0.1"
+  },
+  "scripts": {
+    "lint": "eslint '**/*.js'",
+    "format": "pretty-quick"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn format --staged",
+      "pre-push": "yarn format && yarn lint"
+    }
+  }
+}
