@@ -14,7 +14,7 @@ class Storage {
   }
 
   openRegexMapper(cb) {
-    console.info(`Opening regex mapper`);
+    console.info("Opening regex mapper");
     chrome.storage.local.get(["REGEX_MAPPER"], ({ REGEX_MAPPER }) =>
       cb(REGEX_MAPPER || {})
     );
@@ -33,10 +33,10 @@ class Storage {
   getScriptFilesForUrl(url, cb) {
     console.info(`Getting script files for url ${url}`);
     this.openRegexMapper((regexMapper) => {
-      console.info(`RegexMapper`, regexMapper);
+      console.info("RegexMapper", regexMapper);
       const filenames = Object.entries(regexMapper)
-        .filter(([regex, filename]) => new RegExp(regex).test(url))
-        .map(([_, filename]) => filename);
+        .filter(([regex]) => new RegExp(regex).test(url))
+        .map(([, filename]) => filename);
       cb(filenames);
     });
   }
@@ -75,9 +75,7 @@ function handleUpdatedTab(tabId, changeInfo, tab) {
 function parseScriptFolder(jsUrls, tab) {
   console.info(`Parsing index file, got ${JSON.stringify(jsUrls)}`);
   storage.clear();
-  jsUrls.forEach((url, i) =>
-    chrome.tabs.create({ url, windowId: tab.windowId })
-  );
+  jsUrls.forEach((url) => chrome.tabs.create({ url, windowId: tab.windowId }));
   chrome.tabs.remove([tab.id]);
 }
 
@@ -96,7 +94,7 @@ function saveScriptFile(filename, code, tab) {
   chrome.tabs.remove([tab.id]);
 }
 
-function openScriptFolder(folderUrl, cb) {
+function openScriptFolder(folderUrl) {
   chrome.windows.create({
     url: folderUrl,
     focused: false,
@@ -107,7 +105,7 @@ function openScriptFolder(folderUrl, cb) {
   });
 }
 
-function handleMessage(request, sender, sendResponse) {
+function handleMessage(request, sender) {
   const { type, payload } = request;
   const { url, tab } = sender;
   console.info(`Handling message: type ${type} payload ${payload}`);

@@ -13,7 +13,7 @@
     "pretty-quick": "^2.0.1"
   },
   "scripts": {
-    "lint": "eslint 'src/**/*.js'",
+    "lint": "eslint 'src/**/*.js' --fix",
     "format": "pretty-quick src",
     "compile": "rm dist/* && cp src/* dist"
   },
