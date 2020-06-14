@@ -10,12 +10,13 @@
     "eslint": "^7.2.0",
     "husky": "^4.2.5",
     "prettier": "^2.0.5",
-    "pretty-quick": "^2.0.1"
+    "pretty-quick": "^2.0.1",
+    "rollup": "^2.16.1"
   },
   "scripts": {
     "lint": "eslint 'src/**/*.js' --fix",
     "format": "pretty-quick src",
-    "compile": "rm dist/* && cp src/* dist"
+    "compile": "rm -f dist/* && rollup -c && cp src/manifest.json src/popup.html dist"
   },
   "husky": {
     "hooks": {
