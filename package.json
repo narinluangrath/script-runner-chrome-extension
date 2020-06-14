@@ -1,7 +1,7 @@
 {
   "name": "script-runner-chrome-extension",
   "version": "0.0.1",
-  "description": "Run custom javascript on websites",
+  "description": "Run custom javascript on websites using local filesystem scripts",
   "main": "background.js",
   "author": "Narin Luangrath <narin.luangrath@gmail.com>",
   "license": "MIT",
