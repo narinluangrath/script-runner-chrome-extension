@@ -1,23 +1,14 @@
-export default [
-  {
-    input: "src/background.js",
-    output: {
-      file: "dist/background.js",
-      format: "iife",
-    },
+import resolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
+import nodePolyfills from "rollup-plugin-node-polyfills";
+
+const SRC_FILES = ["background.js", "content.js", "popup.js"];
+
+export default SRC_FILES.map((file) => ({
+  input: `src/${file}`,
+  output: {
+    file: `dist/${file}`,
+    format: "iife",
   },
-  {
-    input: "src/content.js",
-    output: {
-      file: "dist/content.js",
-      format: "iife",
-    },
-  },
-  {
-    input: "src/popup.js",
-    output: {
-      file: "dist/popup.js",
-      format: "iife",
-    },
-  },
-];
+  plugins: [resolve(), commonjs(), nodePolyfills()],
+}));

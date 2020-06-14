@@ -1,3 +1,5 @@
+import { MatchPattern } from "./match-pattern";
+
 console.info = () => {};
 
 class Storage {
@@ -5,18 +7,18 @@ class Storage {
     chrome.storage.local.clear();
   }
 
-  updateRegexMapper(regexStr, filename) {
-    console.info(`Updating regex mapper for ${regexStr}: ${filename}`);
-    this.openRegexMapper((regexMapper) => {
-      regexMapper = { ...regexMapper, [regexStr]: filename };
-      chrome.storage.local.set({ REGEX_MAPPER: regexMapper });
+  updatePatternMapper(patternStr, filename) {
+    console.info(`Updating pattern mapper for ${patternStr}: ${filename}`);
+    this.openPatternMapper((patternMapper) => {
+      patternMapper = { ...patternMapper, [patternStr]: filename };
+      chrome.storage.local.set({ PATTERN_MAPPER: patternMapper });
     });
   }
 
-  openRegexMapper(cb) {
-    console.info("Opening regex mapper");
-    chrome.storage.local.get(["REGEX_MAPPER"], ({ REGEX_MAPPER }) =>
-      cb(REGEX_MAPPER || {})
+  openPatternMapper(cb) {
+    console.info("Opening pattern mapper");
+    chrome.storage.local.get(["PATTERN_MAPPER"], ({ PATTERN_MAPPER }) =>
+      cb(PATTERN_MAPPER || {})
     );
   }
 
@@ -32,10 +34,10 @@ class Storage {
 
   getScriptFilesForUrl(url, cb) {
     console.info(`Getting script files for url ${url}`);
-    this.openRegexMapper((regexMapper) => {
-      console.info("RegexMapper", regexMapper);
-      const filenames = Object.entries(regexMapper)
-        .filter(([regex]) => new RegExp(regex).test(url))
+    this.openPatternMapper((patternMapper) => {
+      console.info("PatternMapper", patternMapper);
+      const filenames = Object.entries(patternMapper)
+        .filter(([pattern]) => new MatchPattern(pattern).isMatch(url))
         .map(([, filename]) => filename);
       cb(filenames);
     });
@@ -81,12 +83,12 @@ function parseScriptFolder(jsUrls, tab) {
 
 function saveScriptFile(filename, code, tab) {
   console.info(`Saving script file: ${filename}`);
-  // Parse regex from top of file
-  const match = code.match(/\/\/ Matches:(?<regex>.*)/);
-  const regex = match && match.groups && match.groups.regex;
-  console.info(`Obtained regex ${regex}`);
-  if (regex && regex.length) {
-    storage.updateRegexMapper(regex.trim(), filename);
+  // Parse pattern from top of file
+  const match = code.match(/\/\/ Pattern:(?<pattern>.*)/);
+  const pattern = match && match.groups && match.groups.pattern;
+  console.info(`Obtained pattern ${pattern}`);
+  if (pattern && pattern.length) {
+    storage.updatePatternMapper(pattern.trim(), filename);
     storage.saveScriptFile(code, filename);
   }
 
