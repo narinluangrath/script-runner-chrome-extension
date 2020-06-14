@@ -21,8 +21,6 @@ function Main() {
     SendJSFilesFromIndexFile();
   } else if (isScriptRunnerScript) {
     ReadScriptRunnerScript();
-  } else {
-    // Normal HTML Document. Check to see if scripts match.
   }
 }
 
