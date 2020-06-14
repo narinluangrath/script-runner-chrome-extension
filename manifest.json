@@ -6,9 +6,16 @@
   "browser_action": {
     "default_popup": "hello.html"
   },
+  "permissions": ["storage", "file:///*", "tabs"],
   "background": {
     "scripts": ["background.js"],
     "persistent": false
   },
-  "permissions": ["fileSystem"]
+  "content_scripts": [
+    {
+      "matches": ["file:///*"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
 }

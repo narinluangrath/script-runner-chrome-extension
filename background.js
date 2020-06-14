@@ -1,7 +1,6 @@
-const fileSystemConfig = {
-  type: "openDirectory",
-  suggestedName: "~/dev/script-runner-scripts",
-  accepts: ["js"],
-};
+console.log("Running background.js");
 
-chrome.fileSystem.chooseEntry(fileSystemConfig, console.log);
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+  const jsUrls = request.jsUrls;
+  jsUrls.forEach((url) => chrome.tabs.create({ url }));
+});
