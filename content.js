@@ -7,6 +7,11 @@ function SendJSFilesFromIndexFile() {
   chrome.runtime.sendMessage({ type: "INDEX_FILE", payload: jsUrls });
 }
 
+function ReadScriptRunnerScript() {
+  const jsCode = document.body.innerText;
+  chrome.runtime.sendMessage({ type: "SCRIPT_FILE", payload: jsCode });
+}
+
 function Main() {
   const url = document.URL;
   const isScriptRunnerDir = url.endsWith("script-runner-scripts/");
@@ -15,7 +20,7 @@ function Main() {
   if (isScriptRunnerDir) {
     SendJSFilesFromIndexFile();
   } else if (isScriptRunnerScript) {
-    // Parse the file, save it to storage, close the file
+    ReadScriptRunnerScript();
   } else {
     // Normal HTML Document. Check to see if scripts match.
   }
