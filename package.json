@@ -15,7 +15,7 @@
   "scripts": {
     "lint": "eslint '**/*.js'",
     "format": "pretty-quick",
-    "compile": "cp background.js content.js hello.html manifest.json dist"
+    "compile": "rm dist/* && cp background.js content.js popup.html popup.js manifest.json dist"
   },
   "husky": {
     "hooks": {

@@ -4,7 +4,7 @@ function SendJSFilesFromIndexFile() {
   const jsUrls = fileUrls
     .filter((url) => url.endsWith("sr.js"))
     .map((url) => `file://${url}`);
-  chrome.runtime.sendMessage({ type: "INDEX_FILE", payload: jsUrls });
+  chrome.runtime.sendMessage({ type: "SCRIPT_FILE_URLS", payload: jsUrls });
 }
 
 function ReadScriptRunnerScript() {
@@ -12,16 +12,27 @@ function ReadScriptRunnerScript() {
   chrome.runtime.sendMessage({ type: "SCRIPT_FILE", payload: jsCode });
 }
 
-function Main() {
-  const url = document.URL;
-  const isScriptRunnerDir = url.endsWith("script-runner-scripts/");
-  const isScriptRunnerScript = url.endsWith("sr.js");
+function sanitizeUrl(url) {
+  url = (url && url.toLowerCase()) || "";
+  url = url[url.length - 1] === "/" ? url.substring(0, url.length - 1) : url;
+  return url;
+}
 
-  if (isScriptRunnerDir) {
-    SendJSFilesFromIndexFile();
-  } else if (isScriptRunnerScript) {
-    ReadScriptRunnerScript();
-  }
+function Main() {
+  chrome.storage.local.get(["scriptFolder"], ({ scriptFolder }) => {
+    // Santize URLs
+    let url = sanitizeUrl(document.URL);
+    scriptFolder = sanitizeUrl(scriptFolder);
+
+    const isScriptRunnerDir = url === scriptFolder;
+    const isScriptRunnerScript = url.endsWith("sr.js");
+
+    if (isScriptRunnerDir) {
+      SendJSFilesFromIndexFile();
+    } else if (isScriptRunnerScript) {
+      ReadScriptRunnerScript();
+    }
+  });
 }
 
 Main();

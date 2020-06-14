@@ -72,10 +72,13 @@ function handleUpdatedTab(tabId, changeInfo, tab) {
   });
 }
 
-function parseIndexFile(jsUrls) {
+function parseScriptFolder(jsUrls, tab) {
   console.info(`Parsing index file, got ${JSON.stringify(jsUrls)}`);
   storage.clear();
-  jsUrls.forEach((url) => chrome.tabs.create({ url }));
+  jsUrls.forEach((url, i) =>
+    chrome.tabs.create({ url, windowId: tab.windowId })
+  );
+  chrome.tabs.remove([tab.id]);
 }
 
 function saveScriptFile(filename, code, tab) {
@@ -93,14 +96,28 @@ function saveScriptFile(filename, code, tab) {
   chrome.tabs.remove([tab.id]);
 }
 
+function openScriptFolder(folderUrl, cb) {
+  chrome.windows.create({
+    url: folderUrl,
+    focused: false,
+    top: 0,
+    left: 0,
+    width: 0,
+    height: 0,
+  });
+}
+
 function handleMessage(request, sender, sendResponse) {
   const { type, payload } = request;
   const { url, tab } = sender;
   console.info(`Handling message: type ${type} payload ${payload}`);
 
   switch (type) {
-    case "INDEX_FILE":
-      parseIndexFile(payload);
+    case "SCRIPT_FOLDER_SET":
+      openScriptFolder(payload);
+      break;
+    case "SCRIPT_FILE_URLS":
+      parseScriptFolder(payload, tab);
       break;
     case "SCRIPT_FILE":
       saveScriptFile(url, payload, tab);
