@@ -1,6 +1,10 @@
 console.info = () => {};
 
 class Storage {
+  clear() {
+    chrome.storage.local.clear();
+  }
+
   updateRegexMapper(regexStr, filename) {
     console.info(`Updating regex mapper for ${regexStr}: ${filename}`);
     this.openRegexMapper((regexMapper) => {
@@ -12,7 +16,7 @@ class Storage {
   openRegexMapper(cb) {
     console.info(`Opening regex mapper`);
     chrome.storage.local.get(["REGEX_MAPPER"], ({ REGEX_MAPPER }) =>
-      cb(REGEX_MAPPER)
+      cb(REGEX_MAPPER || {})
     );
   }
 
@@ -70,6 +74,7 @@ function handleUpdatedTab(tabId, changeInfo, tab) {
 
 function parseIndexFile(jsUrls) {
   console.info(`Parsing index file, got ${JSON.stringify(jsUrls)}`);
+  storage.clear();
   jsUrls.forEach((url) => chrome.tabs.create({ url }));
 }
 
