@@ -15,7 +15,7 @@
   },
   "scripts": {
     "lint": "eslint 'src/**/*.js' --fix",
-    "format": "pretty-quick src",
+    "format": "pretty-quick src *.js *.json",
     "compile": "rm -f dist/* && rollup -c && cp src/manifest.json src/popup.html dist"
   },
   "husky": {
