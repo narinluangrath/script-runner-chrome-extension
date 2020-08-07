@@ -1,4 +1,4 @@
-function SendJSFilesFromIndexFile() {
+function sendJSFilesFromIndexFile() {
   const anchorEls = Array.from(document.getElementsByTagName("a"));
   const fileUrls = anchorEls.map((anchorEl) => anchorEl.getAttribute("href"));
   const jsUrls = fileUrls
@@ -7,7 +7,7 @@ function SendJSFilesFromIndexFile() {
   chrome.runtime.sendMessage({ type: "SCRIPT_FILE_URLS", payload: jsUrls });
 }
 
-function ReadScriptRunnerScript() {
+function readScriptRunnerScript() {
   const jsCode = document.body.innerText;
   chrome.runtime.sendMessage({ type: "SCRIPT_FILE", payload: jsCode });
 }
@@ -28,9 +28,9 @@ function Main() {
     const isScriptRunnerScript = url.endsWith("sr.js");
 
     if (isScriptRunnerDir) {
-      SendJSFilesFromIndexFile();
+      sendJSFilesFromIndexFile();
     } else if (isScriptRunnerScript) {
-      ReadScriptRunnerScript();
+      readScriptRunnerScript();
     }
   });
 }
