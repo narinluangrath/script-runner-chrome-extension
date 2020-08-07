@@ -1,50 +1,6 @@
-import { MatchPattern } from "./match-pattern";
+import * as storage from "./storage";
 
 console.info = () => {};
-
-class Storage {
-  clear() {
-    chrome.storage.local.clear();
-  }
-
-  updatePatternMapper(patternStr, filename) {
-    console.info(`Updating pattern mapper for ${patternStr}: ${filename}`);
-    this.openPatternMapper((patternMapper) => {
-      patternMapper = { ...patternMapper, [patternStr]: filename };
-      chrome.storage.local.set({ PATTERN_MAPPER: patternMapper });
-    });
-  }
-
-  openPatternMapper(cb) {
-    console.info("Opening pattern mapper");
-    chrome.storage.local.get(["PATTERN_MAPPER"], ({ PATTERN_MAPPER }) =>
-      cb(PATTERN_MAPPER || {})
-    );
-  }
-
-  saveScriptFile(script, filename) {
-    console.info(`Saving script for file ${filename}`);
-    chrome.storage.local.set({ [filename]: script });
-  }
-
-  openScriptFile(filename, cb) {
-    console.info(`Opening script file for file ${filename}`);
-    chrome.storage.local.get([filename], (res) => cb(res[filename]));
-  }
-
-  getScriptFilesForUrl(url, cb) {
-    console.info(`Getting script files for url ${url}`);
-    this.openPatternMapper((patternMapper) => {
-      console.info("PatternMapper", patternMapper);
-      const filenames = Object.entries(patternMapper)
-        .filter(([pattern]) => new MatchPattern(pattern).isMatch(url))
-        .map(([, filename]) => filename);
-      cb(filenames);
-    });
-  }
-}
-
-const storage = new Storage();
 
 function Main() {
   chrome.runtime.onMessage.addListener(handleMessage);
