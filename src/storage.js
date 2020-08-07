@@ -1,45 +1,63 @@
 /**
  * Wrapper functions around Chrome Extension Storage API
+ * https://developer.chrome.com/extensions/storage
  */
 
 import { MatchPattern } from "./match-pattern";
 
-export const clear = () => {
-  chrome.storage.local.clear();
-};
+// Check for runtime error
+// https://developer.chrome.com/extensions/runtime#property-lastError
+const getError = () => chrome.runtime.lastError;
 
-export const updatePatternMapper = (patternStr, filename) => {
+const promisify = (fn) => (fnArgs) =>
+  new Promise((resolve, reject) => {
+    try {
+      fn(...fnArgs, (result) => {
+        const error = getError();
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+
+// Promisify chrome.storage callback APIs
+const get = promisify(chrome.storage.local.get);
+const set = promisify(chrome.storage.local.set);
+export const clear = promisify(chrome.storage.local.clear);
+
+export const updatePatternMapper = async (patternStr, filename) => {
   console.info(`Updating pattern mapper for ${patternStr}: ${filename}`);
-  openPatternMapper((patternMapper) => {
-    patternMapper = { ...patternMapper, [patternStr]: filename };
-    chrome.storage.local.set({ PATTERN_MAPPER: patternMapper });
-  });
+  let patternMapper = await openPatternMapper();
+  patternMapper = { ...patternMapper, [patternStr]: filename };
+  await set({ PATTERN_MAPPER: patternMapper });
 };
 
-export const openPatternMapper = (cb) => {
+export const openPatternMapper = async () => {
   console.info("Opening pattern mapper");
-  chrome.storage.local.get(["PATTERN_MAPPER"], ({ PATTERN_MAPPER }) =>
-    cb(PATTERN_MAPPER || {})
-  );
+  const result = await get("PATTERN_MAPPER");
+  return result["PATTERN_MAPPER"];
 };
 
-export const saveScriptFile = (script, filename) => {
+export const saveScriptFile = async (script, filename) => {
   console.info(`Saving script for file ${filename}`);
-  chrome.storage.local.set({ [filename]: script });
+  await set({ [filename]: script });
 };
 
-export const openScriptFile = (filename, cb) => {
+export const openScriptFile = async (filename) => {
   console.info(`Opening script file for file ${filename}`);
-  chrome.storage.local.get([filename], (res) => cb(res[filename]));
+  const result = await get(filename);
+  return result[filename];
 };
 
-export const getScriptFilesForUrl = (url, cb) => {
+export const getScriptFilesForUrl = async (url) => {
   console.info(`Getting script files for url ${url}`);
-  openPatternMapper((patternMapper) => {
-    console.info("PatternMapper", patternMapper);
-    const filenames = Object.entries(patternMapper)
-      .filter(([pattern]) => new MatchPattern(pattern).isMatch(url))
-      .map(([, filename]) => filename);
-    cb(filenames);
-  });
+  const patternMapper = await openPatternMapper();
+  return Object.entries(patternMapper)
+    .filter(([pattern]) => new MatchPattern(pattern).isMatch(url))
+    .map(([, filename]) => filename);
 };

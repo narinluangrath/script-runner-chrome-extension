@@ -7,7 +7,7 @@ function Main() {
   chrome.tabs.onUpdated.addListener(handleUpdatedTab);
 }
 
-function handleUpdatedTab(tabId, changeInfo, tab) {
+async function handleUpdatedTab(tabId, changeInfo, tab) {
   const ready = changeInfo.status === "complete";
   if (!ready) {
     return;
@@ -17,35 +17,33 @@ function handleUpdatedTab(tabId, changeInfo, tab) {
     throw Error("Could not get URL");
   }
   console.info(`Updated tab for url ${url} with id ${tabId}`);
-  storage.getScriptFilesForUrl(url, (filenames) => {
-    filenames.forEach((filename) => {
-      storage.openScriptFile(filename, (script) => {
-        console.info(`Executing script on tab ${tabId} with content ${script}`);
-        chrome.tabs.executeScript(tabId, {
-          code: script,
-          runAt: "document_end",
-        });
-      });
-    });
-  });
+  const filenames = await storage.getScriptFilesForUrl(url);
+  const scriptPromises = filenames.map((f) => storage.openScriptFile(f));
+  const scripts = await Promise.all(scriptPromises);
+  scripts.forEach((script) =>
+    chrome.tabs.executeScript(tabId, {
+      code: script,
+      runAt: "document_end",
+    })
+  );
 }
 
-function parseScriptFolder(jsUrls, tab) {
+async function parseScriptFolder(jsUrls, tab) {
   console.info(`Parsing index file, got ${JSON.stringify(jsUrls)}`);
-  storage.clear();
+  await storage.clear();
   jsUrls.forEach((url) => chrome.tabs.create({ url, windowId: tab.windowId }));
   chrome.tabs.remove([tab.id]);
 }
 
-function saveScriptFile(filename, code, tab) {
+async function saveScriptFile(filename, code, tab) {
   console.info(`Saving script file: ${filename}`);
   // Parse pattern from top of file
   const match = code.match(/\/\/ Pattern:(?<pattern>.*)/);
   const pattern = match && match.groups && match.groups.pattern;
   console.info(`Obtained pattern ${pattern}`);
   if (pattern && pattern.length) {
-    storage.updatePatternMapper(pattern.trim(), filename);
-    storage.saveScriptFile(code, filename);
+    await storage.updatePatternMapper(pattern.trim(), filename);
+    await storage.saveScriptFile(code, filename);
   }
 
   // TODO Add Date Modified
