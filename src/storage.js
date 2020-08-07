@@ -10,7 +10,7 @@ export const clear = () => {
 
 export const updatePatternMapper = (patternStr, filename) => {
   console.info(`Updating pattern mapper for ${patternStr}: ${filename}`);
-  this.openPatternMapper((patternMapper) => {
+  openPatternMapper((patternMapper) => {
     patternMapper = { ...patternMapper, [patternStr]: filename };
     chrome.storage.local.set({ PATTERN_MAPPER: patternMapper });
   });
@@ -35,7 +35,7 @@ export const openScriptFile = (filename, cb) => {
 
 export const getScriptFilesForUrl = (url, cb) => {
   console.info(`Getting script files for url ${url}`);
-  this.openPatternMapper((patternMapper) => {
+  openPatternMapper((patternMapper) => {
     console.info("PatternMapper", patternMapper);
     const filenames = Object.entries(patternMapper)
       .filter(([pattern]) => new MatchPattern(pattern).isMatch(url))
